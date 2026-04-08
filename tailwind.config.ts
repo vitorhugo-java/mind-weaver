@@ -47,6 +47,20 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        canvas: "hsl(var(--canvas))",
+        "canvas-dot": "hsl(var(--canvas-dot))",
+        navbar: {
+          DEFAULT: "hsl(var(--navbar))",
+          foreground: "hsl(var(--navbar-foreground))",
+        },
+        toolbar: {
+          DEFAULT: "hsl(var(--toolbar-bg))",
+          foreground: "hsl(var(--toolbar-foreground))",
+        },
+        node: {
+          bg: "hsl(var(--node-bg))",
+          border: "hsl(var(--node-border))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
