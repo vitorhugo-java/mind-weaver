@@ -14,7 +14,7 @@ export function MindMapCanvas() {
     rootNode,
     addChild, addSibling,
     updateNodeText, updateNodePosition,
-    deleteNode, setTitle,
+    deleteNode, setTitle, autoLayout,
   } = useMindMap();
 
   const [pan, setPan] = useState({ x: 0, y: 0 });
@@ -147,6 +147,7 @@ export function MindMapCanvas() {
         isRoot={selectedNode?.parentId === null}
         onAddChild={() => selectedNodeId && addChild(selectedNodeId)}
         onDelete={() => selectedNodeId && deleteNode(selectedNodeId)}
+        onAutoLayout={autoLayout}
       />
     </div>
   );
