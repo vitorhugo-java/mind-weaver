@@ -128,6 +128,56 @@ export function useMindMap() {
     setSelectedNodeId(node.parentId);
   }, [nodes, updateNodes]);
 
+  const autoLayout = useCallback(() => {
+    if (!rootNode || !map?.id) return;
+
+    const HORIZONTAL_GAP = 250;
+    const VERTICAL_GAP = 80;
+
+    const childrenMap = new Map<string, MindMapNode[]>();
+    nodes.forEach(n => {
+      if (n.parentId) {
+        const siblings = childrenMap.get(n.parentId) || [];
+        siblings.push(n);
+        childrenMap.set(n.parentId, siblings);
+      }
+    });
+
+    const subtreeHeight = new Map<string, number>();
+    function calcHeight(id: string): number {
+      const children = childrenMap.get(id) || [];
+      if (children.length === 0) { subtreeHeight.set(id, VERTICAL_GAP); return VERTICAL_GAP; }
+      const h = children.reduce((sum, c) => sum + calcHeight(c.id), 0);
+      subtreeHeight.set(id, h);
+      return h;
+    }
+    calcHeight(rootNode.id);
+
+    const positions = new Map<string, { x: number; y: number }>();
+    positions.set(rootNode.id, { x: 0, y: 0 });
+
+    function layout(id: string, x: number, yStart: number) {
+      const children = childrenMap.get(id) || [];
+      let yOffset = yStart;
+      children.forEach(child => {
+        const h = subtreeHeight.get(child.id) || VERTICAL_GAP;
+        const cy = yOffset + h / 2;
+        positions.set(child.id, { x, y: cy });
+        layout(child.id, x + HORIZONTAL_GAP, yOffset);
+        yOffset += h;
+      });
+    }
+
+    const totalH = subtreeHeight.get(rootNode.id) || 0;
+    layout(rootNode.id, HORIZONTAL_GAP, -totalH / 2);
+
+    const updated = nodes.map(n => {
+      const pos = positions.get(n.id);
+      return pos ? { ...n, ...pos } : n;
+    });
+    updateNodes(updated);
+  }, [nodes, rootNode, map, updateNodes]);
+
   const setTitle = useCallback((title: string) => {
     if (!map?.id) return;
     setMap(prev => prev ? { ...prev, title } : prev);
@@ -141,6 +191,6 @@ export function useMindMap() {
     rootNode,
     addChild, addSibling,
     updateNodeText, updateNodePosition,
-    deleteNode, setTitle,
+    deleteNode, setTitle, autoLayout,
   };
 }
