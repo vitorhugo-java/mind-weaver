@@ -31,6 +31,7 @@ export function useMindMap() {
   const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const saveTimeout = useRef<ReturnType<typeof setTimeout>>();
+  const needsLayout = useRef(false);
 
   const initialLayoutDone = useRef(false);
 
@@ -49,10 +50,61 @@ export function useMindMap() {
     }, 500);
   }, []);
 
-  const updateNodes = useCallback((updatedNodes: MindMapNode[]) => {
-    setNodes(updatedNodes);
-    if (map?.id) debouncedSave(map.id, updatedNodes);
-  }, [map, debouncedSave]);
+  const applyLayout = useCallback((inputNodes: MindMapNode[]): MindMapNode[] => {
+    const root = inputNodes.find(n => n.parentId === null);
+    if (!root) return inputNodes;
+
+    const HORIZONTAL_GAP = 250;
+    const VERTICAL_GAP = 80;
+
+    const childrenMap = new Map<string, MindMapNode[]>();
+    inputNodes.forEach(n => {
+      if (n.parentId) {
+        const siblings = childrenMap.get(n.parentId) || [];
+        siblings.push(n);
+        childrenMap.set(n.parentId, siblings);
+      }
+    });
+
+    const subtreeHeight = new Map<string, number>();
+    function calcHeight(id: string): number {
+      const children = childrenMap.get(id) || [];
+      if (children.length === 0) { subtreeHeight.set(id, VERTICAL_GAP); return VERTICAL_GAP; }
+      const h = children.reduce((sum, c) => sum + calcHeight(c.id), 0);
+      subtreeHeight.set(id, h);
+      return h;
+    }
+    calcHeight(root.id);
+
+    const positions = new Map<string, { x: number; y: number }>();
+    positions.set(root.id, { x: 0, y: 0 });
+
+    function layout(id: string, x: number, yStart: number) {
+      const children = childrenMap.get(id) || [];
+      let yOffset = yStart;
+      children.forEach(child => {
+        const h = subtreeHeight.get(child.id) || VERTICAL_GAP;
+        const cy = yOffset + h / 2;
+        positions.set(child.id, { x, y: cy });
+        layout(child.id, x + HORIZONTAL_GAP, yOffset);
+        yOffset += h;
+      });
+    }
+
+    const totalH = subtreeHeight.get(root.id) || 0;
+    layout(root.id, HORIZONTAL_GAP, -totalH / 2);
+
+    return inputNodes.map(n => {
+      const pos = positions.get(n.id);
+      return pos ? { ...n, ...pos } : n;
+    });
+  }, []);
+
+  const updateNodes = useCallback((updatedNodes: MindMapNode[], runLayout = false) => {
+    const final = runLayout ? applyLayout(updatedNodes) : updatedNodes;
+    setNodes(final);
+    if (map?.id) debouncedSave(map.id, final);
+  }, [map, debouncedSave, applyLayout]);
 
   const rootNode = nodes.find(n => n.parentId === null);
 
@@ -60,23 +112,20 @@ export function useMindMap() {
     const parent = nodes.find(n => n.id === parentId);
     if (!parent || !map?.id) return;
 
-    const siblings = nodes.filter(n => n.parentId === parentId);
     const depth = getNodeDepth(parentId, nodes) + 1;
-    const angle = siblings.length * 0.6 - (Math.max(siblings.length - 1, 0) * 0.3);
-    const distance = 200;
 
     const newNode: MindMapNode = {
       id: crypto.randomUUID(),
       mapId: map.id,
       parentId,
       text: '',
-      x: parent.x + Math.cos(angle) * distance,
-      y: parent.y + Math.sin(angle) * distance,
+      x: 0,
+      y: 0,
       color: getChildColor(depth),
     };
 
     const updated = [...nodes, newNode];
-    updateNodes(updated);
+    updateNodes(updated, true);
     setSelectedNodeId(newNode.id);
     setEditingNodeId(newNode.id);
     return newNode.id;
@@ -92,13 +141,13 @@ export function useMindMap() {
       mapId: map.id,
       parentId: node.parentId,
       text: '',
-      x: node.x,
-      y: node.y + 80,
+      x: 0,
+      y: 0,
       color: getChildColor(depth),
     };
 
     const updated = [...nodes, newNode];
-    updateNodes(updated);
+    updateNodes(updated, true);
     setSelectedNodeId(newNode.id);
     setEditingNodeId(newNode.id);
     return newNode.id;
@@ -116,7 +165,7 @@ export function useMindMap() {
 
   const deleteNode = useCallback((nodeId: string) => {
     const node = nodes.find(n => n.id === nodeId);
-    if (!node || !node.parentId) return; // can't delete root
+    if (!node || !node.parentId) return;
 
     const toDelete = new Set<string>();
     const collectChildren = (id: string) => {
@@ -126,58 +175,13 @@ export function useMindMap() {
     collectChildren(nodeId);
 
     const updated = nodes.filter(n => !toDelete.has(n.id));
-    updateNodes(updated);
+    updateNodes(updated, true);
     setSelectedNodeId(node.parentId);
   }, [nodes, updateNodes]);
 
   const autoLayout = useCallback(() => {
     if (!rootNode || !map?.id) return;
-
-    const HORIZONTAL_GAP = 250;
-    const VERTICAL_GAP = 80;
-
-    const childrenMap = new Map<string, MindMapNode[]>();
-    nodes.forEach(n => {
-      if (n.parentId) {
-        const siblings = childrenMap.get(n.parentId) || [];
-        siblings.push(n);
-        childrenMap.set(n.parentId, siblings);
-      }
-    });
-
-    const subtreeHeight = new Map<string, number>();
-    function calcHeight(id: string): number {
-      const children = childrenMap.get(id) || [];
-      if (children.length === 0) { subtreeHeight.set(id, VERTICAL_GAP); return VERTICAL_GAP; }
-      const h = children.reduce((sum, c) => sum + calcHeight(c.id), 0);
-      subtreeHeight.set(id, h);
-      return h;
-    }
-    calcHeight(rootNode.id);
-
-    const positions = new Map<string, { x: number; y: number }>();
-    positions.set(rootNode.id, { x: 0, y: 0 });
-
-    function layout(id: string, x: number, yStart: number) {
-      const children = childrenMap.get(id) || [];
-      let yOffset = yStart;
-      children.forEach(child => {
-        const h = subtreeHeight.get(child.id) || VERTICAL_GAP;
-        const cy = yOffset + h / 2;
-        positions.set(child.id, { x, y: cy });
-        layout(child.id, x + HORIZONTAL_GAP, yOffset);
-        yOffset += h;
-      });
-    }
-
-    const totalH = subtreeHeight.get(rootNode.id) || 0;
-    layout(rootNode.id, HORIZONTAL_GAP, -totalH / 2);
-
-    const updated = nodes.map(n => {
-      const pos = positions.get(n.id);
-      return pos ? { ...n, ...pos } : n;
-    });
-    updateNodes(updated);
+    updateNodes(nodes, true);
   }, [nodes, rootNode, map, updateNodes]);
 
   const setTitle = useCallback((title: string) => {
