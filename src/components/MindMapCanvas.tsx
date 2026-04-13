@@ -125,7 +125,7 @@ export function MindMapCanvas() {
             transformOrigin: '0 0',
           }}
         >
-          <MindMapConnections nodes={nodes} />
+          <MindMapConnections nodes={nodes} allNodes={allNodes} onToggleCollapse={toggleCollapse} />
           {nodes.map(node => (
             <MindMapNodeComponent
               key={node.id}
