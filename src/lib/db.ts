@@ -15,6 +15,7 @@ export interface MindMapNode {
   x: number;
   y: number;
   color: string;
+  collapsed?: boolean;
 }
 
 class MindMapDB extends Dexie {
