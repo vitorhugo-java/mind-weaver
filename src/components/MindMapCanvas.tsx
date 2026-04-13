@@ -131,12 +131,10 @@ export function MindMapCanvas() {
               isSelected={node.id === selectedNodeId}
               isEditing={node.id === editingNodeId}
               isRoot={node.parentId === null}
-              zoom={zoom}
               onSelect={() => setSelectedNodeId(node.id)}
               onStartEdit={() => { setSelectedNodeId(node.id); setEditingNodeId(node.id); }}
               onStopEdit={() => setEditingNodeId(null)}
               onTextChange={(text) => updateNodeText(node.id, text)}
-              onDrag={(x, y) => updateNodePosition(node.id, x, y)}
             />
           ))}
         </div>
