@@ -68,7 +68,8 @@ export function useMindMap() {
 
     const subtreeHeight = new Map<string, number>();
     function calcHeight(id: string): number {
-      const children = childrenMap.get(id) || [];
+      const node = inputNodes.find(n => n.id === id);
+      const children = (node?.collapsed) ? [] : (childrenMap.get(id) || []);
       if (children.length === 0) { subtreeHeight.set(id, VERTICAL_GAP); return VERTICAL_GAP; }
       const h = children.reduce((sum, c) => sum + calcHeight(c.id), 0);
       subtreeHeight.set(id, h);
@@ -80,7 +81,8 @@ export function useMindMap() {
     positions.set(root.id, { x: 0, y: 0 });
 
     function layout(id: string, x: number, yStart: number) {
-      const children = childrenMap.get(id) || [];
+      const node = inputNodes.find(n => n.id === id);
+      const children = (node?.collapsed) ? [] : (childrenMap.get(id) || []);
       let yOffset = yStart;
       children.forEach(child => {
         const h = subtreeHeight.get(child.id) || VERTICAL_GAP;
