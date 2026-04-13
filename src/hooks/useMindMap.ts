@@ -32,6 +32,8 @@ export function useMindMap() {
   const [loading, setLoading] = useState(true);
   const saveTimeout = useRef<ReturnType<typeof setTimeout>>();
 
+  const initialLayoutDone = useRef(false);
+
   useEffect(() => {
     getOrCreateDefaultMap().then(({ map, nodes }) => {
       setMap(map);
