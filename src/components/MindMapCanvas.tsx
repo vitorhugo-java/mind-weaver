@@ -8,13 +8,14 @@ import { Loader2 } from 'lucide-react';
 
 export function MindMapCanvas() {
   const {
-    map, nodes, loading,
+    map, nodes, allNodes, loading,
     selectedNodeId, setSelectedNodeId,
     editingNodeId, setEditingNodeId,
     rootNode,
     addChild, addSibling,
     updateNodeText, updateNodePosition,
     deleteNode, setTitle, autoLayout,
+    toggleCollapse,
   } = useMindMap();
 
   const [pan, setPan] = useState({ x: 0, y: 0 });
@@ -124,7 +125,7 @@ export function MindMapCanvas() {
             transformOrigin: '0 0',
           }}
         >
-          <MindMapConnections nodes={nodes} />
+          <MindMapConnections nodes={nodes} allNodes={allNodes} onToggleCollapse={toggleCollapse} />
           {nodes.map(node => (
             <MindMapNodeComponent
               key={node.id}

@@ -68,7 +68,8 @@ export function useMindMap() {
 
     const subtreeHeight = new Map<string, number>();
     function calcHeight(id: string): number {
-      const children = childrenMap.get(id) || [];
+      const node = inputNodes.find(n => n.id === id);
+      const children = (node?.collapsed) ? [] : (childrenMap.get(id) || []);
       if (children.length === 0) { subtreeHeight.set(id, VERTICAL_GAP); return VERTICAL_GAP; }
       const h = children.reduce((sum, c) => sum + calcHeight(c.id), 0);
       subtreeHeight.set(id, h);
@@ -80,7 +81,8 @@ export function useMindMap() {
     positions.set(root.id, { x: 0, y: 0 });
 
     function layout(id: string, x: number, yStart: number) {
-      const children = childrenMap.get(id) || [];
+      const node = inputNodes.find(n => n.id === id);
+      const children = (node?.collapsed) ? [] : (childrenMap.get(id) || []);
       let yOffset = yStart;
       children.forEach(child => {
         const h = subtreeHeight.get(child.id) || VERTICAL_GAP;
@@ -184,6 +186,26 @@ export function useMindMap() {
     updateNodes(nodes, true);
   }, [nodes, rootNode, map, updateNodes]);
 
+  const toggleCollapse = useCallback((nodeId: string) => {
+    const node = nodes.find(n => n.id === nodeId);
+    if (!node) return;
+    const updated = nodes.map(n => n.id === nodeId ? { ...n, collapsed: !n.collapsed } : n);
+    updateNodes(updated, true);
+  }, [nodes, updateNodes]);
+
+  // Compute visible nodes (filter out children of collapsed nodes)
+  const visibleNodes = (() => {
+    const hiddenSet = new Set<string>();
+    const collectHidden = (parentId: string) => {
+      nodes.filter(n => n.parentId === parentId).forEach(child => {
+        hiddenSet.add(child.id);
+        collectHidden(child.id);
+      });
+    };
+    nodes.filter(n => n.collapsed).forEach(n => collectHidden(n.id));
+    return nodes.filter(n => !hiddenSet.has(n.id));
+  })();
+
   const setTitle = useCallback((title: string) => {
     if (!map?.id) return;
     setMap(prev => prev ? { ...prev, title } : prev);
@@ -191,12 +213,13 @@ export function useMindMap() {
   }, [map]);
 
   return {
-    map, nodes, loading,
+    map, nodes: visibleNodes, allNodes: nodes, loading,
     selectedNodeId, setSelectedNodeId,
     editingNodeId, setEditingNodeId,
     rootNode,
     addChild, addSibling,
     updateNodeText, updateNodePosition,
     deleteNode, setTitle, autoLayout,
+    toggleCollapse,
   };
 }
