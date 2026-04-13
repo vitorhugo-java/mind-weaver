@@ -23,9 +23,10 @@ export function MindMapCanvas() {
   const isPanning = useRef(false);
   const panStart = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
 
-  // Center canvas on root node on first load
+  // Center canvas and auto-layout on first load
   useEffect(() => {
     if (!loading && rootNode && containerRef.current) {
+      autoLayout();
       const rect = containerRef.current.getBoundingClientRect();
       setPan({ x: rect.width / 2 - rootNode.x, y: rect.height / 2 - rootNode.y });
     }
