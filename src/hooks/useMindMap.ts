@@ -31,6 +31,7 @@ export function useMindMap() {
   const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const saveTimeout = useRef<ReturnType<typeof setTimeout>>();
+  const needsLayout = useRef(false);
 
   const initialLayoutDone = useRef(false);
 
@@ -49,10 +50,61 @@ export function useMindMap() {
     }, 500);
   }, []);
 
-  const updateNodes = useCallback((updatedNodes: MindMapNode[]) => {
-    setNodes(updatedNodes);
-    if (map?.id) debouncedSave(map.id, updatedNodes);
-  }, [map, debouncedSave]);
+  const applyLayout = useCallback((inputNodes: MindMapNode[]): MindMapNode[] => {
+    const root = inputNodes.find(n => n.parentId === null);
+    if (!root) return inputNodes;
+
+    const HORIZONTAL_GAP = 250;
+    const VERTICAL_GAP = 80;
+
+    const childrenMap = new Map<string, MindMapNode[]>();
+    inputNodes.forEach(n => {
+      if (n.parentId) {
+        const siblings = childrenMap.get(n.parentId) || [];
+        siblings.push(n);
+        childrenMap.set(n.parentId, siblings);
+      }
+    });
+
+    const subtreeHeight = new Map<string, number>();
+    function calcHeight(id: string): number {
+      const children = childrenMap.get(id) || [];
+      if (children.length === 0) { subtreeHeight.set(id, VERTICAL_GAP); return VERTICAL_GAP; }
+      const h = children.reduce((sum, c) => sum + calcHeight(c.id), 0);
+      subtreeHeight.set(id, h);
+      return h;
+    }
+    calcHeight(root.id);
+
+    const positions = new Map<string, { x: number; y: number }>();
+    positions.set(root.id, { x: 0, y: 0 });
+
+    function layout(id: string, x: number, yStart: number) {
+      const children = childrenMap.get(id) || [];
+      let yOffset = yStart;
+      children.forEach(child => {
+        const h = subtreeHeight.get(child.id) || VERTICAL_GAP;
+        const cy = yOffset + h / 2;
+        positions.set(child.id, { x, y: cy });
+        layout(child.id, x + HORIZONTAL_GAP, yOffset);
+        yOffset += h;
+      });
+    }
+
+    const totalH = subtreeHeight.get(root.id) || 0;
+    layout(root.id, HORIZONTAL_GAP, -totalH / 2);
+
+    return inputNodes.map(n => {
+      const pos = positions.get(n.id);
+      return pos ? { ...n, ...pos } : n;
+    });
+  }, []);
+
+  const updateNodes = useCallback((updatedNodes: MindMapNode[], runLayout = false) => {
+    const final = runLayout ? applyLayout(updatedNodes) : updatedNodes;
+    setNodes(final);
+    if (map?.id) debouncedSave(map.id, final);
+  }, [map, debouncedSave, applyLayout]);
 
   const rootNode = nodes.find(n => n.parentId === null);
 
