@@ -22,8 +22,44 @@ export function MindMapCanvas() {
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const containerRef = useRef<HTMLDivElement>(null);
+  const exportRef = useRef<HTMLDivElement>(null);
   const isPanning = useRef(false);
   const panStart = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
+
+  const handleExport = useCallback(async () => {
+    if (!exportRef.current) return;
+    // Compute bounding box of all nodes for tight crop
+    const padding = 80;
+    const xs = nodes.map(n => n.x);
+    const ys = nodes.map(n => n.y);
+    const minX = Math.min(...xs) - 200;
+    const minY = Math.min(...ys) - 100;
+    const maxX = Math.max(...xs) + 200;
+    const maxY = Math.max(...ys) + 100;
+    const width = Math.max(maxX - minX + padding * 2, 400);
+    const height = Math.max(maxY - minY + padding * 2, 400);
+
+    try {
+      const dataUrl = await toPng(exportRef.current, {
+        backgroundColor: undefined,
+        cacheBust: true,
+        pixelRatio: 2,
+        filter: (el) => !(el instanceof HTMLElement && el.hasAttribute('data-export-ignore')),
+        style: {
+          transform: `translate(${-minX + padding}px, ${-minY + padding}px)`,
+          transformOrigin: '0 0',
+        },
+        width,
+        height,
+      });
+      const link = document.createElement('a');
+      link.download = `${(map?.title || 'mindmap').replace(/[^\w-]+/g, '_')}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error('Export failed', err);
+    }
+  }, [nodes, map]);
 
   // Center canvas and auto-layout on first load
   useEffect(() => {
