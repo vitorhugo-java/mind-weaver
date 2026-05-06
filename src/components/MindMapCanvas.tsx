@@ -30,6 +30,7 @@ export function MindMapCanvas() {
       autoLayout();
       const rect = containerRef.current.getBoundingClientRect();
       setPan({ x: rect.width / 2 - rootNode.x, y: rect.height / 2 - rootNode.y });
+      if (!selectedNodeId) setSelectedNodeId(rootNode.id);
     }
   }, [loading, rootNode?.id]);
 
@@ -62,7 +63,11 @@ export function MindMapCanvas() {
   // Keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (!selectedNodeId || editingNodeId) return;
+      if (editingNodeId) return;
+      if (!selectedNodeId) return;
+
+      const current = nodes.find(n => n.id === selectedNodeId);
+      if (!current) return;
 
       if (e.key === 'Tab') {
         e.preventDefault();
@@ -76,12 +81,31 @@ export function MindMapCanvas() {
       } else if (e.key === 'F2') {
         e.preventDefault();
         setEditingNodeId(selectedNodeId);
+      } else if (e.key.startsWith('Arrow')) {
+        e.preventDefault();
+        const children = nodes.filter(n => n.parentId === current.id);
+        const siblings = current.parentId
+          ? nodes.filter(n => n.parentId === current.parentId).sort((a, b) => a.y - b.y)
+          : [];
+        const idx = siblings.findIndex(n => n.id === current.id);
+
+        let nextId: string | null = null;
+        if (e.key === 'ArrowRight' && children.length) {
+          nextId = children.sort((a, b) => a.y - b.y)[0].id;
+        } else if (e.key === 'ArrowLeft' && current.parentId) {
+          nextId = current.parentId;
+        } else if (e.key === 'ArrowUp' && idx > 0) {
+          nextId = siblings[idx - 1].id;
+        } else if (e.key === 'ArrowDown' && idx >= 0 && idx < siblings.length - 1) {
+          nextId = siblings[idx + 1].id;
+        }
+        if (nextId) setSelectedNodeId(nextId);
       }
     };
 
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [selectedNodeId, editingNodeId, addChild, addSibling, deleteNode, setEditingNodeId]);
+  }, [selectedNodeId, editingNodeId, nodes, addChild, addSibling, deleteNode, setEditingNodeId, setSelectedNodeId]);
 
   if (loading) {
     return (

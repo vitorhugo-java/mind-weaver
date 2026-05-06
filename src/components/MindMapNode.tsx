@@ -29,9 +29,13 @@ export function MindMapNodeComponent({
     ? 'text-xl font-extrabold text-foreground'
     : 'text-sm font-medium text-foreground/80';
 
+  const selectedRing = isSelected
+    ? 'ring-2 ring-primary ring-offset-2 ring-offset-canvas shadow-md'
+    : '';
+
   return (
     <div
-      className={`absolute select-none flex items-center justify-center whitespace-nowrap cursor-pointer transition-all duration-150 z-10 px-2 bg-canvas rounded ${textStyle}`}
+      className={`absolute select-none flex items-center justify-center whitespace-nowrap cursor-pointer transition-all duration-150 z-10 px-3 py-1 bg-canvas rounded-md ${textStyle} ${selectedRing}`}
       style={{
         left: node.x,
         top: node.y,
