@@ -142,13 +142,25 @@ export function MindMapCanvas() {
         </div>
       </div>
 
-      <FloatingToolbar
-        hasSelection={!!selectedNodeId}
-        isRoot={selectedNode?.parentId === null}
-        onAddChild={() => selectedNodeId && addChild(selectedNodeId)}
-        onDelete={() => selectedNodeId && deleteNode(selectedNodeId)}
-        onAutoLayout={autoLayout}
-      />
+      {(() => {
+        const containerRect = containerRef.current?.getBoundingClientRect();
+        const toolbarPos = selectedNode && containerRect
+          ? {
+              x: containerRect.left + pan.x + selectedNode.x * zoom,
+              y: containerRect.top + pan.y + (selectedNode.y - 20) * zoom,
+            }
+          : null;
+        return (
+          <FloatingToolbar
+            hasSelection={!!selectedNodeId}
+            isRoot={selectedNode?.parentId === null}
+            position={toolbarPos}
+            onAddChild={() => selectedNodeId && addChild(selectedNodeId)}
+            onDelete={() => selectedNodeId && deleteNode(selectedNodeId)}
+            onAutoLayout={autoLayout}
+          />
+        );
+      })()}
     </div>
   );
 }
