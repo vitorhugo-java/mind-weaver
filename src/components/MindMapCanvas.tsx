@@ -3,7 +3,9 @@ import { useMindMap } from '@/hooks/useMindMap';
 import { FloatingToolbar } from './FloatingToolbar';
 import { MindMapNodeComponent } from './MindMapNode';
 import { MindMapConnections } from './MindMapConnections';
+import { ExportFab } from './ExportFab';
 import { Loader2 } from 'lucide-react';
+import { toPng } from 'html-to-image';
 
 export function MindMapCanvas() {
   const {
