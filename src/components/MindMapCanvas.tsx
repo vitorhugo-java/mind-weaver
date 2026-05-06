@@ -124,7 +124,7 @@ export function MindMapCanvas() {
     <div className="h-screen w-screen overflow-hidden bg-canvas flex flex-col">
       <div
         ref={containerRef}
-        className="flex-1 mt-12 relative cursor-grab active:cursor-grabbing"
+        className="flex-1 relative cursor-grab active:cursor-grabbing"
         onWheel={handleWheel}
         onMouseDown={handleBgMouseDown}
         onMouseMove={handleMouseMove}
