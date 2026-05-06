@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { getOrCreateDefaultMap, saveNodes, updateMapTitle, type MindMap, type MindMapNode } from '@/lib/db';
+import { readMapFromUrl, writeMapToUrl } from '@/lib/urlState';
 
 const NODE_COLORS = [
   'hsl(217, 91%, 60%)',
