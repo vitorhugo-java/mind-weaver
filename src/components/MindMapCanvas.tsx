@@ -118,8 +118,6 @@ export function MindMapCanvas() {
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-canvas flex flex-col">
-      <TopNavBar title={map?.title || ''} onTitleChange={setTitle} />
-
       <div
         ref={containerRef}
         className="flex-1 mt-12 relative cursor-grab active:cursor-grabbing"
