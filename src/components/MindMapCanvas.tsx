@@ -1,6 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useMindMap } from '@/hooks/useMindMap';
-import { TopNavBar } from './TopNavBar';
 import { FloatingToolbar } from './FloatingToolbar';
 import { MindMapNodeComponent } from './MindMapNode';
 import { MindMapConnections } from './MindMapConnections';
