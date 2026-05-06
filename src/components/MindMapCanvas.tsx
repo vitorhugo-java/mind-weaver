@@ -226,6 +226,8 @@ export function MindMapCanvas() {
           />
         );
       })()}
+
+      <ExportFab onClick={handleExport} />
     </div>
   );
 }
