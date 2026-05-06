@@ -30,6 +30,7 @@ export function MindMapCanvas() {
       autoLayout();
       const rect = containerRef.current.getBoundingClientRect();
       setPan({ x: rect.width / 2 - rootNode.x, y: rect.height / 2 - rootNode.y });
+      if (!selectedNodeId) setSelectedNodeId(rootNode.id);
     }
   }, [loading, rootNode?.id]);
 
