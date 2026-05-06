@@ -182,7 +182,7 @@ export function MindMapCanvas() {
             position={toolbarPos}
             onAddChild={() => selectedNodeId && addChild(selectedNodeId)}
             onDelete={() => selectedNodeId && deleteNode(selectedNodeId)}
-            onAutoLayout={autoLayout}
+            
           />
         );
       })()}
