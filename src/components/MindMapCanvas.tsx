@@ -179,10 +179,11 @@ export function MindMapCanvas() {
           <FloatingToolbar
             hasSelection={!!selectedNodeId}
             isRoot={selectedNode?.parentId === null}
+            hasImage={!!selectedNode?.image}
             position={toolbarPos}
             onAddChild={() => selectedNodeId && addChild(selectedNodeId)}
             onDelete={() => selectedNodeId && deleteNode(selectedNodeId)}
-            
+            onSetImage={(img) => selectedNodeId && setNodeImage(selectedNodeId, img)}
           />
         );
       })()}
