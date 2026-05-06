@@ -239,6 +239,6 @@ export function useMindMap() {
     addChild, addSibling,
     updateNodeText, updateNodePosition,
     deleteNode, setTitle, autoLayout,
-    toggleCollapse,
+    toggleCollapse, setNodeImage,
   };
 }
