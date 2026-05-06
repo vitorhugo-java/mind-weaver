@@ -182,6 +182,7 @@ export function MindMapCanvas() {
 
         {/* Zoom/Pan layer */}
         <div
+          ref={exportRef}
           className="absolute"
           style={{
             transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
