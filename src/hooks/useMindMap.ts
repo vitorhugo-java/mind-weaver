@@ -207,6 +207,11 @@ export function useMindMap() {
     updateNodes(updated, true);
   }, [nodes, updateNodes]);
 
+  const setNodeImage = useCallback((nodeId: string, image: string | undefined) => {
+    const updated = nodes.map(n => n.id === nodeId ? { ...n, image } : n);
+    updateNodes(updated, true);
+  }, [nodes, updateNodes]);
+
   // Compute visible nodes (filter out children of collapsed nodes)
   const visibleNodes = (() => {
     const hiddenSet = new Set<string>();
