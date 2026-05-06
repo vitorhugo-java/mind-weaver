@@ -31,7 +31,7 @@ export function MindMapNodeComponent({
 
   return (
     <div
-      className={`absolute select-none flex items-center justify-center whitespace-nowrap cursor-pointer transition-all duration-150 ${textStyle}`}
+      className={`absolute select-none flex items-center justify-center whitespace-nowrap cursor-pointer transition-all duration-150 z-10 px-2 bg-canvas rounded ${textStyle}`}
       style={{
         left: node.x,
         top: node.y,
