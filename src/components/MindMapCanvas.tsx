@@ -73,7 +73,11 @@ export function MindMapCanvas() {
         addChild(selectedNodeId);
       } else if (e.key === 'Enter') {
         e.preventDefault();
-        addSibling(selectedNodeId);
+        if (current.parentId) {
+          addChild(current.parentId);
+        } else {
+          addChild(current.id);
+        }
       } else if (e.key === 'Delete' || e.key === 'Backspace') {
         e.preventDefault();
         deleteNode(selectedNodeId);
