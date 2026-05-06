@@ -1,6 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useMindMap } from '@/hooks/useMindMap';
-import { TopNavBar } from './TopNavBar';
 import { FloatingToolbar } from './FloatingToolbar';
 import { MindMapNodeComponent } from './MindMapNode';
 import { MindMapConnections } from './MindMapConnections';
@@ -74,7 +73,11 @@ export function MindMapCanvas() {
         addChild(selectedNodeId);
       } else if (e.key === 'Enter') {
         e.preventDefault();
-        addSibling(selectedNodeId);
+        if (current.parentId) {
+          addChild(current.parentId);
+        } else {
+          addChild(current.id);
+        }
       } else if (e.key === 'Delete' || e.key === 'Backspace') {
         e.preventDefault();
         deleteNode(selectedNodeId);
@@ -119,11 +122,9 @@ export function MindMapCanvas() {
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-canvas flex flex-col">
-      <TopNavBar title={map?.title || ''} onTitleChange={setTitle} />
-
       <div
         ref={containerRef}
-        className="flex-1 mt-12 relative cursor-grab active:cursor-grabbing"
+        className="flex-1 relative cursor-grab active:cursor-grabbing"
         onWheel={handleWheel}
         onMouseDown={handleBgMouseDown}
         onMouseMove={handleMouseMove}
@@ -181,7 +182,7 @@ export function MindMapCanvas() {
             position={toolbarPos}
             onAddChild={() => selectedNodeId && addChild(selectedNodeId)}
             onDelete={() => selectedNodeId && deleteNode(selectedNodeId)}
-            onAutoLayout={autoLayout}
+            
           />
         );
       })()}
