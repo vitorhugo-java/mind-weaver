@@ -35,7 +35,7 @@ export function MindMapNodeComponent({
 
   return (
     <div
-      className={`absolute select-none flex items-center justify-center whitespace-nowrap cursor-pointer transition-all duration-150 z-10 px-3 py-1 bg-canvas rounded-md ${textStyle} ${selectedRing}`}
+      className={`absolute select-none flex flex-col items-center justify-center whitespace-nowrap cursor-pointer transition-all duration-150 z-10 px-3 py-1 bg-canvas rounded-md ${textStyle} ${selectedRing}`}
       style={{
         left: node.x,
         top: node.y,
@@ -46,6 +46,14 @@ export function MindMapNodeComponent({
       onClick={(e) => { e.stopPropagation(); onSelect(); }}
       onDoubleClick={(e) => { e.stopPropagation(); onStartEdit(); }}
     >
+      {node.image && (
+        <img
+          src={node.image}
+          alt=""
+          className="max-w-[160px] max-h-[120px] object-contain rounded mb-1"
+          draggable={false}
+        />
+      )}
       {isEditing ? (
         <input
           ref={inputRef}

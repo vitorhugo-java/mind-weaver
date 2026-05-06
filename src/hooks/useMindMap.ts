@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { getOrCreateDefaultMap, saveNodes, updateMapTitle, type MindMap, type MindMapNode } from '@/lib/db';
+import { readMapFromUrl, writeMapToUrl } from '@/lib/urlState';
 
 const NODE_COLORS = [
   'hsl(217, 91%, 60%)',
@@ -36,9 +37,16 @@ export function useMindMap() {
   const initialLayoutDone = useRef(false);
 
   useEffect(() => {
+    const shared = readMapFromUrl();
     getOrCreateDefaultMap().then(({ map, nodes }) => {
-      setMap(map);
-      setNodes(nodes);
+      if (shared && shared.nodes?.length) {
+        setMap({ ...map, title: shared.map?.title ?? map.title });
+        // Re-bind mapId so persistence still works locally
+        setNodes(shared.nodes.map(n => ({ ...n, mapId: map.id! })));
+      } else {
+        setMap(map);
+        setNodes(nodes);
+      }
       setLoading(false);
     });
   }, []);
@@ -49,6 +57,12 @@ export function useMindMap() {
       saveNodes(mapId, updatedNodes);
     }, 500);
   }, []);
+
+  // Sync to URL hash whenever nodes/title change
+  useEffect(() => {
+    if (loading || !map) return;
+    writeMapToUrl({ map: { title: map.title }, nodes });
+  }, [nodes, map, loading]);
 
   const applyLayout = useCallback((inputNodes: MindMapNode[]): MindMapNode[] => {
     const root = inputNodes.find(n => n.parentId === null);
@@ -193,6 +207,11 @@ export function useMindMap() {
     updateNodes(updated, true);
   }, [nodes, updateNodes]);
 
+  const setNodeImage = useCallback((nodeId: string, image: string | undefined) => {
+    const updated = nodes.map(n => n.id === nodeId ? { ...n, image } : n);
+    updateNodes(updated, true);
+  }, [nodes, updateNodes]);
+
   // Compute visible nodes (filter out children of collapsed nodes)
   const visibleNodes = (() => {
     const hiddenSet = new Set<string>();
@@ -220,6 +239,6 @@ export function useMindMap() {
     addChild, addSibling,
     updateNodeText, updateNodePosition,
     deleteNode, setTitle, autoLayout,
-    toggleCollapse,
+    toggleCollapse, setNodeImage,
   };
 }

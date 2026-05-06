@@ -14,7 +14,7 @@ export function MindMapCanvas() {
     addChild, addSibling,
     updateNodeText, updateNodePosition,
     deleteNode, setTitle, autoLayout,
-    toggleCollapse,
+    toggleCollapse, setNodeImage,
   } = useMindMap();
 
   const [pan, setPan] = useState({ x: 0, y: 0 });
@@ -179,10 +179,11 @@ export function MindMapCanvas() {
           <FloatingToolbar
             hasSelection={!!selectedNodeId}
             isRoot={selectedNode?.parentId === null}
+            hasImage={!!selectedNode?.image}
             position={toolbarPos}
             onAddChild={() => selectedNodeId && addChild(selectedNodeId)}
             onDelete={() => selectedNodeId && deleteNode(selectedNodeId)}
-            
+            onSetImage={(img) => selectedNodeId && setNodeImage(selectedNodeId, img)}
           />
         );
       })()}
