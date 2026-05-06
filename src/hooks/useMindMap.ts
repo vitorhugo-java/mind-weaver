@@ -37,9 +37,16 @@ export function useMindMap() {
   const initialLayoutDone = useRef(false);
 
   useEffect(() => {
+    const shared = readMapFromUrl();
     getOrCreateDefaultMap().then(({ map, nodes }) => {
-      setMap(map);
-      setNodes(nodes);
+      if (shared && shared.nodes?.length) {
+        setMap({ ...map, title: shared.map?.title ?? map.title });
+        // Re-bind mapId so persistence still works locally
+        setNodes(shared.nodes.map(n => ({ ...n, mapId: map.id! })));
+      } else {
+        setMap(map);
+        setNodes(nodes);
+      }
       setLoading(false);
     });
   }, []);
@@ -50,6 +57,12 @@ export function useMindMap() {
       saveNodes(mapId, updatedNodes);
     }, 500);
   }, []);
+
+  // Sync to URL hash whenever nodes/title change
+  useEffect(() => {
+    if (loading || !map) return;
+    writeMapToUrl({ map: { title: map.title }, nodes });
+  }, [nodes, map, loading]);
 
   const applyLayout = useCallback((inputNodes: MindMapNode[]): MindMapNode[] => {
     const root = inputNodes.find(n => n.parentId === null);
