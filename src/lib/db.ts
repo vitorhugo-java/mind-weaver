@@ -16,6 +16,7 @@ export interface MindMapNode {
   y: number;
   color: string;
   collapsed?: boolean;
+  image?: string; // base64 data URL
 }
 
 class MindMapDB extends Dexie {
