@@ -18,7 +18,7 @@ export function MindMapConnections({ nodes, allNodes, onToggleCollapse }: Props)
   });
 
   return (
-    <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ overflow: 'visible' }}>
+    <svg className="absolute inset-0 w-full h-full pointer-events-none z-0" style={{ overflow: 'visible' }}>
       {nodes.filter(n => n.parentId).map(node => {
         const parent = nodeMap.get(node.parentId!);
         if (!parent) return null;
@@ -35,10 +35,10 @@ export function MindMapConnections({ nodes, allNodes, onToggleCollapse }: Props)
             key={`${parent.id}-${node.id}`}
             d={`M ${parent.x} ${parent.y} C ${cx1} ${cy1}, ${cx2} ${cy2}, ${node.x} ${node.y}`}
             fill="none"
-            stroke={node.color}
-            strokeWidth={2.5}
+            className="stroke-slate-400 dark:stroke-slate-500"
+            strokeWidth={2}
             strokeLinecap="round"
-            opacity={0.6}
+            opacity={0.7}
           />
         );
       })}
