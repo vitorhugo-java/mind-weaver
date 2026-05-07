@@ -16,7 +16,7 @@ export function MindMapCanvas() {
     addChild, addSibling,
     updateNodeText, updateNodePosition,
     deleteNode, setTitle, autoLayout,
-    toggleCollapse, setNodeImage,
+    toggleCollapse, setNodeImage, clearMap,
   } = useMindMap();
 
   const [pan, setPan] = useState({ x: 0, y: 0 });
