@@ -227,7 +227,11 @@ export function MindMapCanvas() {
         );
       })()}
 
-      <ExportFab onClick={handleExport} />
+      <ExportFab
+        onExport={handleExport}
+        onClear={clearMap}
+        canClear={allNodes.length > 1}
+      />
     </div>
   );
 }
