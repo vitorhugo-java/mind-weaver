@@ -1,19 +1,65 @@
-import { Download } from 'lucide-react';
+import { Download, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface ExportFabProps {
-  onClick: () => void;
+  onExport: () => void;
+  onClear: () => void;
+  canClear: boolean;
 }
 
-export function ExportFab({ onClick }: ExportFabProps) {
+export function ExportFab({ onExport, onClear, canClear }: ExportFabProps) {
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
   return (
-    <button
-      data-export-ignore
-      onClick={onClick}
-      className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-2xl flex items-center justify-center hover:scale-105 active:scale-95 transition-transform z-50"
-      title="Export as PNG"
-      aria-label="Export as PNG"
-    >
-      <Download className="w-6 h-6" />
-    </button>
+    <>
+      <div
+        data-export-ignore
+        className="fixed top-4 left-4 flex items-center gap-2 z-50"
+      >
+        <button
+          onClick={onExport}
+          className="w-10 h-10 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
+          title="Export as PNG"
+          aria-label="Export as PNG"
+        >
+          <Download className="w-4 h-4" />
+        </button>
+        {canClear && (
+          <button
+            onClick={() => setConfirmOpen(true)}
+            className="w-10 h-10 rounded-full bg-destructive text-destructive-foreground shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
+            title="Clear map"
+            aria-label="Clear map"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        )}
+      </div>
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Clear mind map?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete all nodes and reset the canvas to a single root node. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={onClear}>Clear map</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { getOrCreateDefaultMap, saveNodes, updateMapTitle, type MindMap, type MindMapNode } from '@/lib/db';
+import { getOrCreateDefaultMap, saveNodes, updateMapTitle, clearAllData, type MindMap, type MindMapNode } from '@/lib/db';
 import { readMapFromUrl, writeMapToUrl } from '@/lib/urlState';
 
 const NODE_COLORS = [
@@ -231,6 +231,18 @@ export function useMindMap() {
     updateMapTitle(map.id, title);
   }, [map]);
 
+  const clearMap = useCallback(async () => {
+    await clearAllData();
+    // Clear URL hash
+    history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
+    // Recreate default map
+    const { map: newMap, nodes: newNodes } = await getOrCreateDefaultMap();
+    setMap(newMap);
+    setNodes(newNodes);
+    setSelectedNodeId(newNodes[0]?.id ?? null);
+    setEditingNodeId(null);
+  }, []);
+
   return {
     map, nodes: visibleNodes, allNodes: nodes, loading,
     selectedNodeId, setSelectedNodeId,
@@ -239,6 +251,6 @@ export function useMindMap() {
     addChild, addSibling,
     updateNodeText, updateNodePosition,
     deleteNode, setTitle, autoLayout,
-    toggleCollapse, setNodeImage,
+    toggleCollapse, setNodeImage, clearMap,
   };
 }
