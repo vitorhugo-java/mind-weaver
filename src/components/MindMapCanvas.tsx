@@ -189,20 +189,25 @@ export function MindMapCanvas() {
             transformOrigin: '0 0',
           }}
         >
-          <MindMapConnections nodes={nodes} allNodes={allNodes} onToggleCollapse={toggleCollapse} />
-          {nodes.map(node => (
-            <MindMapNodeComponent
-              key={node.id}
-              node={node}
-              isSelected={node.id === selectedNodeId}
-              isEditing={node.id === editingNodeId}
-              isRoot={node.parentId === null}
-              onSelect={() => setSelectedNodeId(node.id)}
-              onStartEdit={() => { setSelectedNodeId(node.id); setEditingNodeId(node.id); }}
-              onStopEdit={() => setEditingNodeId(null)}
-              onTextChange={(text) => updateNodeText(node.id, text)}
-            />
-          ))}
+          <MindMapConnections nodes={nodes} allNodes={allNodes} />
+          {nodes.map(node => {
+            const childCount = allNodes.filter(n => n.parentId === node.id).length;
+            return (
+              <MindMapNodeComponent
+                key={node.id}
+                node={node}
+                isSelected={node.id === selectedNodeId}
+                isEditing={node.id === editingNodeId}
+                isRoot={node.parentId === null}
+                childCount={childCount}
+                onSelect={() => setSelectedNodeId(node.id)}
+                onStartEdit={() => { setSelectedNodeId(node.id); setEditingNodeId(node.id); }}
+                onStopEdit={() => setEditingNodeId(null)}
+                onTextChange={(text) => updateNodeText(node.id, text)}
+                onToggleCollapse={() => toggleCollapse(node.id)}
+              />
+            );
+          })}
         </div>
       </div>
 
