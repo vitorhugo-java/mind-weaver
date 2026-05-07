@@ -75,3 +75,10 @@ export async function saveNodes(mapId: number, nodes: MindMapNode[]) {
 export async function updateMapTitle(mapId: number, title: string) {
   await db.maps.update(mapId, { title, updatedAt: new Date() });
 }
+
+export async function clearAllData() {
+  await db.transaction('rw', db.nodes, db.maps, async () => {
+    await db.nodes.clear();
+    await db.maps.clear();
+  });
+}
