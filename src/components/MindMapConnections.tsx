@@ -15,8 +15,19 @@ export function MindMapConnections({ nodes }: Props) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-visible text-slate-400 dark:text-slate-500"
-      style={{ position: 'absolute', overflow: 'visible' }}
+      className="overflow-visible"
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100%',
+        height: '100%',
+        pointerEvents: 'none',
+        zIndex: 0,
+        overflow: 'visible',
+      }}
     >
       {nodes.filter(n => n.parentId).map(node => {
         const parent = nodeMap.get(node.parentId!);
@@ -34,12 +45,17 @@ export function MindMapConnections({ nodes }: Props) {
         const cx2 = startX + dx * 0.6;
         const cy2 = endY;
 
+        const coordinates = [startX, startY, cx1, cy1, cx2, cy2, endX, endY];
+        if (coordinates.some(coord => coord === undefined || Number.isNaN(coord))) {
+          return null;
+        }
+
         return (
           <path
             key={`${parent.id}-${node.id}`}
             d={`M ${startX} ${startY} C ${cx1} ${cy1}, ${cx2} ${cy2}, ${endX} ${endY}`}
             fill="none"
-            stroke="currentColor"
+            stroke="#94a3b8"
             strokeWidth={2}
             strokeLinecap="round"
             opacity={0.7}
