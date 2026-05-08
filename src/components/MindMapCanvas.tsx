@@ -183,13 +183,14 @@ export function MindMapCanvas() {
         {/* Zoom/Pan layer */}
         <div
           ref={exportRef}
-          className="absolute relative"
           style={{
-            position: 'relative',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: 10000,
+            height: 10000,
             transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
             transformOrigin: '0 0',
-            width: 0,
-            height: 0,
           }}
         >
           <MindMapConnections nodes={nodes} allNodes={allNodes} />
