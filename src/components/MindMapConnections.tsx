@@ -15,15 +15,16 @@ export function MindMapConnections({ nodes }: Props) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
+      width={10000}
+      height={10000}
+      viewBox="0 0 10000 10000"
       className="overflow-visible"
       style={{
         position: 'absolute',
         top: 0,
         left: 0,
-        right: 0,
-        bottom: 0,
-        width: '100%',
-        height: '100%',
+        width: 10000,
+        height: 10000,
         pointerEvents: 'none',
         zIndex: 0,
         overflow: 'visible',
@@ -46,7 +47,7 @@ export function MindMapConnections({ nodes }: Props) {
         const cy2 = endY;
 
         const coordinates = [startX, startY, cx1, cy1, cx2, cy2, endX, endY];
-        if (coordinates.some(coord => coord === undefined || Number.isNaN(coord))) {
+        if (coordinates.some(coord => !Number.isFinite(coord))) {
           return null;
         }
 
