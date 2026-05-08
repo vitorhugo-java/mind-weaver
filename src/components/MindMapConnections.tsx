@@ -14,8 +14,9 @@ export function MindMapConnections({ nodes }: Props) {
 
   return (
     <svg
-      className="absolute inset-0 w-full h-full pointer-events-none z-0"
-      style={{ overflow: 'visible' }}
+      xmlns="http://www.w3.org/2000/svg"
+      className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-visible text-slate-400 dark:text-slate-500"
+      style={{ position: 'absolute', overflow: 'visible' }}
     >
       {nodes.filter(n => n.parentId).map(node => {
         const parent = nodeMap.get(node.parentId!);
@@ -38,7 +39,7 @@ export function MindMapConnections({ nodes }: Props) {
             key={`${parent.id}-${node.id}`}
             d={`M ${startX} ${startY} C ${cx1} ${cy1}, ${cx2} ${cy2}, ${endX} ${endY}`}
             fill="none"
-            className="stroke-slate-400 dark:stroke-slate-500"
+            stroke="currentColor"
             strokeWidth={2}
             strokeLinecap="round"
             opacity={0.7}

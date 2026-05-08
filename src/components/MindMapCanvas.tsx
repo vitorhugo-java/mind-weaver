@@ -185,8 +185,11 @@ export function MindMapCanvas() {
           ref={exportRef}
           className="absolute"
           style={{
+            position: 'relative',
             transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
             transformOrigin: '0 0',
+            width: 0,
+            height: 0,
           }}
         >
           <MindMapConnections nodes={nodes} allNodes={allNodes} />
