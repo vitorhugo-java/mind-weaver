@@ -47,7 +47,7 @@ export function MindMapConnections({ nodes }: Props) {
         const cy2 = endY;
 
         const coordinates = [startX, startY, cx1, cy1, cx2, cy2, endX, endY];
-        if (coordinates.some(coord => coord === undefined || Number.isNaN(coord))) {
+        if (coordinates.some(coord => !Number.isFinite(coord))) {
           return null;
         }
 
